@@ -1,5 +1,10 @@
 // Exemplo de uso das rotas usando fetch
-import { UserData } from './types/auth';
+interface UserData {
+  name: string;
+  email: string;
+  password: string;
+  role?: 'USER' | 'ADMIN';
+}
 
 interface UserResponse {
   id: string;
@@ -11,43 +16,34 @@ interface UserResponse {
   updatedAt: string;
 }
 
-// Criar um novo usuário
-const createUser = async (userData: UserData): Promise<UserResponse> => {
+import { UserService } from './services/userService';
+import { initModels } from './models';
+
+async function createUser() {
   try {
-    console.log('Enviando dados:', userData); // Debug
+    // Inicializar modelos e sincronizar banco de dados
+    await initModels();
 
-    const response = await fetch('http://localhost:7000/v1/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
+    const userService = new UserService();
+    const userData = {
+      name: 'João Silva',
+      email: 'ulysses.oliveira2015@gmail.com',
+      password: 'Senha123',
+      role: 'USER' as const
+    };
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message);
-    }
-
-    return await response.json();
+    console.log('Enviando dados:', userData);
+    const user = await userService.createUser(userData);
+    console.log('Usuário criado:', user);
   } catch (error) {
     console.error('Erro ao criar usuário, test.ts:', error);
     throw error;
   }
-};
+}
 
-// Exemplo de uso
-const novoUsuario: UserData = {
-  name: 'João Silva',
-  email: 'ulysses.oliveira2015@gmail.com',
-  password: 'Senha123',
-  role: 'USER'
-};
-
-// Criar usuário
-createUser(novoUsuario)
-  .then(user => console.log('Usuário criado:', user))
-  .catch(error => console.error('Erro:', error));
+createUser().catch((error) => {
+  console.error('Erro:', error);
+});
 
 // Buscar usuário por ID
 const getUserById = async (userId: string): Promise<UserResponse> => {

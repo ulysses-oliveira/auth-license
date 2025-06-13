@@ -5,7 +5,6 @@ import cors from 'cors';
 import passport from 'passport';
 import httpStatus from 'http-status';
 import v1Routes from './routes/v1';
-import { jwtStrategy } from './config/passport';
 import { errorConverter, errorHandler } from './middlewares/error';
 import { ApiError } from './utils/ApiError';
 
@@ -31,7 +30,6 @@ app.use(cors());
 
 // jwt authentication
 app.use(passport.initialize());
-passport.use('jwt', jwtStrategy);
 
 // Rota de Olá Mundo
 app.get('/', (req: Request, res: Response) => {

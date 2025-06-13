@@ -30,7 +30,6 @@ model Users {
   name            String
   email           String    @unique
   password        String
-  googleId        String?   @unique @map("google_id")
   role            Role      @default(USER)
   isEmailVerified Boolean   @default(false) @map("is_email_verified")
   licenses        License[]

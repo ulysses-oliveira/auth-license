@@ -3,7 +3,6 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
-  googleId?: string;
   role: 'USER' | 'ADMIN';
   isEmailVerified: boolean;
   createdAt: Date;
@@ -30,5 +29,4 @@ export interface IUserResponse {
   name: string;
   email: string;
   role: 'USER' | 'ADMIN';
-  isEmailVerified: boolean;
 }

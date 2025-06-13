@@ -1,12 +1,14 @@
 import { Sequelize } from 'sequelize';
-import User from './User';
-import License from './License';
 import config from '../config/config';
 
 // Configuração do Sequelize
 const sequelize = new Sequelize(config.postgres.url, {
   dialect: 'postgres',
-  logging: config.env === 'development' ? console.log : false,
+  logging: (msg) => {
+    if (config.env === 'development' && !msg.includes('Executing')) {
+      console.log(msg);
+    }
+  },
   pool: {
     max: 10,
     min: 0,
@@ -15,28 +17,40 @@ const sequelize = new Sequelize(config.postgres.url, {
   }
 });
 
+// Importar modelos
+import UserModel from './User';
+import LicenseModel from './License';
+
 // Inicializar modelos
-const UserModel = User.initModel(sequelize);
-const LicenseModel = License.initModel(sequelize);
+const User = UserModel(sequelize);
+const License = LicenseModel(sequelize);
 
-// Definir associações
-UserModel.hasMany(LicenseModel, {
-  foreignKey: 'userId',
-  as: 'licenses'
-});
+// Inicializar associações
+const initModels = async () => {
+  try {
+    // Sincronizar banco de dados
+    await sequelize.sync({ force: true }); // force: true irá recriar as tabelas
+    console.log('Banco de dados sincronizado com sucesso');
 
-LicenseModel.belongsTo(UserModel, {
-  foreignKey: 'userId',
-  as: 'user'
-});
+    // Inicializar associações
+    User.hasMany(License, { foreignKey: 'userId', as: 'licenses' });
+    License.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+    console.log('Modelos inicializados com sucesso');
+  } catch (error) {
+    console.error('Erro ao inicializar modelos:', error);
+    throw error;
+  }
+};
 
 // Exportar instância do Sequelize e modelos
-export { sequelize };
-export { UserModel as User, LicenseModel as License };
+export { sequelize, initModels };
+export { User, License };
 
 // Exportar como default um objeto com tudo
 export default {
   sequelize,
-  User: UserModel,
-  License: LicenseModel
+  User,
+  License,
+  initModels
 };
