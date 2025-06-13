@@ -70,6 +70,10 @@ interface Config {
     };
     from?: string;
   };
+  google: {
+    clientId: string;
+    clientSecret: string;
+  };
 }
 
 // Config final exportada
@@ -102,6 +106,10 @@ const config: Config = {
     },
     from: envVars.EMAIL_FROM,
   },
+  google: {
+    clientId: envVars.GOOGLE_CLIENT_ID,
+    clientSecret: envVars.GOOGLE_CLIENT_SECRET
+  }
 };
 
 export default config;

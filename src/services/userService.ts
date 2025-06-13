@@ -52,11 +52,7 @@ export class UserService {
 
   async findUserByEmail(email: string): Promise<IUser | null> {
     const user = await User.findOne({
-      where: { email },
-      include: [{
-        model: License,
-        as: 'licenses'
-      }]
+      where: { email }
     });
     return user;
   }

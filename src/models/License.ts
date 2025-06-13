@@ -1,6 +1,5 @@
 import { DataTypes, Model, Optional, Sequelize } from 'sequelize';
 import { User } from './User';
-import sequelize from './index';
 
 // Atributos do modelo
 interface LicenseAttributes {

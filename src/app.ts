@@ -27,6 +27,12 @@ app.use(compression());
 
 // enable cors
 app.use(cors());
+// const corsOptions = {
+//   origin: ['http://localhost:7000', 'http://127.0.0.1:7000', 'http://localhost:5500', 'http://127.0.0.1:5500'],
+//   methods: ['GET', 'POST'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true
+// };
 
 // jwt authentication
 app.use(passport.initialize());

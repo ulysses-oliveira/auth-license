@@ -33,8 +33,16 @@ const initModels = async () => {
     console.log('Banco de dados sincronizado com sucesso');
 
     // Inicializar associações
-    User.hasMany(License, { foreignKey: 'userId', as: 'licenses' });
-    License.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+    User.hasMany(License, { 
+      foreignKey: 'userId', 
+      as: 'licenses',
+      onDelete: 'CASCADE'
+    });
+    License.belongsTo(User, { 
+      foreignKey: 'userId', 
+      as: 'user',
+      onDelete: 'CASCADE'
+    });
 
     console.log('Modelos inicializados com sucesso');
   } catch (error) {
