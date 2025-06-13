@@ -5,6 +5,10 @@ interface UserResponse {
   id: string;
   email: string;
   role: 'USER' | 'ADMIN';
+  name: string;
+  isEmailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Criar um novo usuário
@@ -27,7 +31,7 @@ const createUser = async (userData: UserData): Promise<UserResponse> => {
 
     return await response.json();
   } catch (error) {
-    console.error('Erro ao criar usuário:', error);
+    console.error('Erro ao criar usuário, test.ts:', error);
     throw error;
   }
 };

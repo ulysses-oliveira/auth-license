@@ -8,6 +8,14 @@ export interface IUser {
   isEmailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
+  licenses?: Array<{
+    id: string;
+    userId: string;
+    status: string;
+    expiresAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
 }
 
 export interface IUserCreation {

@@ -20,6 +20,7 @@ interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'google
 
 // Classe do modelo
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+  // Atributos
   public id!: string;
   public name!: string;
   public email!: string;
@@ -32,7 +33,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 
   // Associações (serão definidas depois)
   public licenses?: License[];
-
+  
   /**
    * Verifica se o email já está em uso
    * @param email - Email do usuário
@@ -118,7 +119,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     }, {
       sequelize,
       modelName: 'User',
-      tableName: 'User',
+      tableName: 'Users',
       timestamps: true,
       underscored: true,
       hooks: {
@@ -139,4 +140,5 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   }
 }
 
+// console.log(User === sequelize.models.User)
 export default User;

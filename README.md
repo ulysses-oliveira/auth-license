@@ -2,4 +2,7 @@
 docker exec -it pg_container psql -U postgres -d authdatabase
 
 ## Faz migrações e apaga todos os dados
-npx prisma migrate reset
+npx prisma migrate reset (não funciona)
+
+## Aplica as migrações
+npx prisma migrate dev --name init

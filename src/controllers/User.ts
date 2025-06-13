@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { createUserSchema } from '../validations/user';
-import { AuthService } from '../services/userService';
+import { UserService } from '../services/userService';
 import catchAsync from '../utils/catchAsync';
 import { ApiError } from '../utils/ApiError';
 import { User } from '../models';
 import { verifyToken } from '../utils/jwt';
 
-const authService = new AuthService();
+const authService = new UserService();
 
 export const registerUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   try {

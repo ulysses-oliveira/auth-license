@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional, Sequelize } from 'sequelize';
 import User from './User';
 
+// Atributos do modelo
 interface LicenseAttributes {
   id: string;
   userId: string;
@@ -13,16 +14,18 @@ interface LicenseAttributes {
 interface LicenseCreationAttributes extends Optional<LicenseAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
 class License extends Model<LicenseAttributes, LicenseCreationAttributes> implements LicenseAttributes {
-  public id!: string;
-  public userId!: string;
-  public status!: 'active' | 'inactive' | 'expired';
-  public expiresAt!: Date;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-
+  // Atributos
+  declare id: string;
+  declare userId: string;
+  declare status: 'active' | 'inactive' | 'expired';
+  declare expiresAt: Date;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
+ 
   // Associações
-  public user?: User;
+  declare user?: User;
 
+  // Método estático para inicializar o modelo
   public static initModel(sequelize: Sequelize): typeof License {
     License.init({
       id: {
@@ -60,13 +63,26 @@ class License extends Model<LicenseAttributes, LicenseCreationAttributes> implem
     }, {
       sequelize,
       modelName: 'License',
-      tableName: 'license',
+      // tableName: 'license',
       timestamps: true,
-      underscored: true
+      // underscored: true
     });
 
     return License;
   }
+
+  public static async createLicenseForUser1(): Promise<License> {
+    const userId = '00000000-0000-0000-0000-000000000001'; // UUID válido para o usuário 1
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1); // Licença válida por 1 ano
+
+    return await License.create({
+      userId,
+      status: 'active',
+      expiresAt
+    });
+  }   
 }
 
+// console.log(License === sequelize.models.License)
 export default License;
