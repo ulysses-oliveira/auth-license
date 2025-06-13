@@ -1,48 +1,18 @@
-import dotenv from 'dotenv';
-import { Dialect } from 'sequelize';g';
+import { Sequelize } from 'sequelize';
+import config from './config';
 
-dotenv.config();
-
-interface DatabaseConfig {
-  url: string;
-  dialect: Dialect;
-  logging?: boolean | ((msg: string) => void);
-  pool?: {
-    max: number;
-    min: number;
-    acquire: number;
-    idle: number;
-  };
-}
-
-interface Config {
-  development: DatabaseConfig;
-  test: DatabaseConfig;
-  production: DatabaseConfig;
-}
-
-const config: Config = {
-  development: {
-    url: process.env.DATABASE_URL!,
+const sequelize = new Sequelize(
+  config.postgres.url || 'postgresql://user:password@localhost:5432/mydb',
+  {
     dialect: 'postgres',
-    logging: console.log
-  },
-  test: {
-    url: process.env.DATABASE_URL!,
-    dialect: 'postgres',
-    logging: false
-  },
-  production: {
-    url: process.env.DATABASE_URL!,
-    dialect: 'postgres',
-    logging: false,
+    logging: config.env === 'development' ? console.log : false,
     pool: {
-      max: 10,
+      max: 5,
       min: 0,
       acquire: 30000,
-      idle: 10000
-    }
+      idle: 10000,
+    },
   }
-};
+);
 
-export default config; 
+export default sequelize;

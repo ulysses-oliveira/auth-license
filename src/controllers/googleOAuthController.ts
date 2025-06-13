@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { GoogleOAuthService } from '../services/googleOAuthService';
+import { GoogleOAuthService } from '../services/GoogleAuthService';
 import { UserService } from '../services/userService';
 import { ApiError } from '../utils/ApiError';
 

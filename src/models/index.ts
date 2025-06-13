@@ -1,64 +1,18 @@
-import { Sequelize } from 'sequelize';
-import config from '../config/config';
+import sequelize from '../config/database';
+import User from './User';
+import VerificationCode from './VerificationCode';
 
-// Configuração do Sequelize
-const sequelize = new Sequelize(config.postgres.url, {
-  dialect: 'postgres',
-  logging: (msg) => {
-    if (config.env === 'development' && !msg.includes('Executing')) {
-      console.log(msg);
-    }
-  },
-  pool: {
-    max: 10,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-  }
-});
-
-// Importar modelos
-import UserModel from './User';
-import LicenseModel from './License';
-
-// Inicializar modelos
-const User = UserModel(sequelize);
-const License = LicenseModel(sequelize);
-
-// Inicializar associações
-const initModels = async () => {
+export const initializeDatabase = async (): Promise<void> => {
   try {
-    // Sincronizar banco de dados
-    await sequelize.sync({ force: true }); // force: true irá recriar as tabelas
-    console.log('Banco de dados sincronizado com sucesso');
-
-    // Inicializar associações
-    User.hasMany(License, { 
-      foreignKey: 'userId', 
-      as: 'licenses',
-      onDelete: 'CASCADE'
-    });
-    License.belongsTo(User, { 
-      foreignKey: 'userId', 
-      as: 'user',
-      onDelete: 'CASCADE'
-    });
-
-    console.log('Modelos inicializados com sucesso');
+    await sequelize.authenticate();
+    console.log('Conexão com o banco de dados estabelecida com sucesso.');
+    
+    await sequelize.sync({ force: false });
+    console.log('Modelos sincronizados com o banco de dados.');
   } catch (error) {
-    console.error('Erro ao inicializar modelos:', error);
-    throw error;
+    console.error('Erro ao conectar com o banco de dados:', error);
+    process.exit(1);
   }
 };
 
-// Exportar instância do Sequelize e modelos
-export { sequelize, initModels };
-export { User, License };
-
-// Exportar como default um objeto com tudo
-export default {
-  sequelize,
-  User,
-  License,
-  initModels
-};
+export { User, VerificationCode };

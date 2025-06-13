@@ -1,6 +1,6 @@
 // src/routes/index.ts
 import { Router } from 'express';
-import userRoutes from './User';
+import userRoutes from './user';
 import googleOAuthRoutes from './googleOAuthRoutes';
 
 const router = Router();

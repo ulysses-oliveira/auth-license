@@ -1,63 +1,69 @@
 import { Request, Response } from 'express';
-import { createUserSchema } from '../validations/user';
-import { UserService } from '../services/userService';
-import catchAsync from '../utils/catchAsync';
-import { ApiError } from '../utils/ApiError';
+import { User } from '../models';
+import { AuthenticatedRequest } from '../middlewares/auth';
 
-const userService = new UserService();
+class UserController {
+  async getProfile(req: Request, res: Response): Promise<void> {
+    const authReq = req as AuthenticatedRequest;
+    try {
+      const user = await User.findByPk(authReq.user!.userId, {
+        attributes: ['id', 'email', 'name', 'role', 'picture', 'isEmailVerified', 'created_at'],
+      });
 
-export const registerUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  try {
-    console.log('req.body recebido:', req.body);
-    
-    // Validação do corpo da requisição
-    const validated = createUserSchema.parse(req.body);
-    console.log('dados validados:', validated);
+      if (!user) {
+        res.status(404).json({ error: 'Usuário não encontrado' });
+        return;
+      }
 
-    // Verifica se o email já está em uso
-    const emailTaken = await userService.isEmailTaken(validated.email);
-    if (emailTaken) {
-      throw new ApiError(400, `Email já está em uso, ${validated.email}}`);
+      res.json(user);
+    } catch (error) {
+      console.error('Erro ao buscar perfil:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
     }
-    
-    // Cria o usuário
-    const user = await userService.createUser(validated);
-    console.log('usuário criado no controller:', user);
+  }
 
-    // Retorna sucesso com id e email
-    return res.status(201).json(user);
+  async updateProfile(req: Request, res: Response): Promise<void> {
+    const authReq = req as AuthenticatedRequest;
+    try {
+      const { name, picture } = req.body;
+      const updateData: any = {};
 
-  } catch (err) {
-    console.error('Erro no controller:', err);
-    if (err instanceof ApiError) {
-      return res.status(err.statusCode).json({ message: err.message });
+      if (name) updateData.name = name;
+      if (picture) updateData.picture = picture;
+
+      const [affectedRows] = await User.update(updateData, {
+        where: { id: authReq.user!.userId },
+      });
+
+      if (affectedRows === 0) {
+        res.status(404).json({ error: 'Usuário não encontrado' });
+        return;
+      }
+
+      const updatedUser = await User.findByPk(authReq.user!.userId, {
+        attributes: ['id', 'email', 'name', 'role', 'picture', 'isEmailVerified'],
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
     }
-
-    // Caso seja erro de validação do Zod ou outro erro inesperado
-    return res.status(400).json({ message: err instanceof Error ? err.message : String(err) });
-  }
-});
-
-export const getUserById = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  const userId = req.params.id;
-
-  // Busca o usuário pelo ID
-  const user = await userService.getUserById(userId);
-  if (!user) {
-    throw new ApiError(404, 'Usuário não encontrado');
   }
 
-  // Retorna os dados do usuário
-  return res.status(200).json({ id: user.id, email: user.email });
-});
+  async getAllUsers(req: Request, res: Response): Promise<void> {
+    const authReq = req as AuthenticatedRequest;
+    try {
+      const users = await User.findAll({
+        attributes: ['id', 'email', 'name', 'role', 'isEmailVerified', 'created_at'],
+      });
 
-export const getUserByEmail = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  const email = req.params.email;
-
-  const user = await userService.findUserByEmail(email);
-  if (!user) {
-    throw new ApiError(404, 'Usuário não encontrado');
+      res.json(users);
+    } catch (error) {
+      console.error('Erro ao listar usuários:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
   }
+}
 
-  return res.status(200).json({ id: user.id, email: user.email });
-});
+export default new UserController();

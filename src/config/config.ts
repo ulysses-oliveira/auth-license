@@ -24,6 +24,7 @@ const envVarsSchema = Joi.object({
 
   SMTP_HOST: Joi.string(),
   SMTP_PORT: Joi.number(),
+  SMTP_SECURE: Joi.boolean(),
   SMTP_USERNAME: Joi.string(),
   SMTP_PASSWORD: Joi.string(),
   EMAIL_FROM: Joi.string(),
@@ -63,6 +64,7 @@ interface Config {
     smtp: {
       host?: string;
       port?: number;
+      secure?: boolean;
       auth: {
         user?: string;
         pass?: string;

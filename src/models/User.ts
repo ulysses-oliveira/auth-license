@@ -1,77 +1,90 @@
-import { DataTypes, Model, Optional, Sequelize } from 'sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelize from '../config/database';
+import { UserRole } from '../types';
 
-interface UserAttributes {
+export interface UserAttributes {
   id: string;
+  google_id?: string;
   email: string;
-  name: string;
-  password: string;
-  role: 'USER' | 'ADMIN';
+  password?: string;
   isEmailVerified: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  role: UserRole;
+  name: string;
+  picture?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
-export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: string;
-  public name!: string;
+  public google_id?: string;
   public email!: string;
-  public password!: string;
-  public role!: 'USER' | 'ADMIN';
+  public password?: string;
   public isEmailVerified!: boolean;
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  public role!: UserRole;
+  public name!: string;
+  public picture?: string;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
-export default (sequelize: Sequelize) => {
-  User.init(
-    {
-      id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        validate: {
-          isEmail: true,
-        },
-      },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      role: {
-        type: DataTypes.ENUM('USER', 'ADMIN'),
-        allowNull: false,
-        defaultValue: 'USER'
-      },
-      isEmailVerified: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-      }
+User.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
     },
-    {
-      sequelize,
-      tableName: 'users',
-      timestamps: true,
-      indexes: [
-        {
-          unique: true,
-          fields: ['email'],
-        }
-      ],
-    }
-  );
+    google_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true,
+      },
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isEmailVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    role: {
+      type: DataTypes.ENUM(...Object.values(UserRole)),
+      defaultValue: UserRole.USER,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    picture: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'User',
+    tableName: 'users',
+    timestamps: true,
+  }
+);
 
-  return User;
-};
+export default User;

@@ -1,14 +1,12 @@
-// src/routes/user.routes.ts
 import { Router } from 'express';
-import validate from '../../middlewares/validate';
-import { createUserSchema } from '../../validations/user';
-import { getUserByEmail, getUserById, registerUser } from '../../controllers/userController';
+import UserController from '../../controllers/UserController';
+import { authenticateToken, requireRole } from '../../middlewares/auth';
+import { UserRole } from '../../types';
 
-const userRoutes = Router();
+const router = Router();
 
-userRoutes
-  .post('/register', validate(createUserSchema), registerUser)
-  .get('/:email', getUserByEmail)
-  .get('/:id', getUserById);
+router.get('/profile', authenticateToken, UserController.getProfile);
+router.put('/profile', authenticateToken, UserController.updateProfile);
+router.get('/all', authenticateToken, requireRole(UserRole.ADM), UserController.getAllUsers);
 
-export default userRoutes;
+export default router;

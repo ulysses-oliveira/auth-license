@@ -1,112 +1,105 @@
-// Exemplo de uso das rotas usando fetch
-interface UserData {
+interface ApiError {
+  message: string;
+}
+
+interface UsuarioResponse {
+  message: string;
+  userId: string;
+}
+
+async function criarUsuario(dados: {
   name: string;
   email: string;
   password: string;
-  role?: 'USER' | 'ADMIN';
-}
-
-interface UserResponse {
-  id: string;
-  email: string;
-  role: 'USER' | 'ADMIN';
-  name: string;
-  isEmailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-import { UserService } from './services/userService';
-import { initModels } from './models';
-
-async function createUser() {
+  role?: string;
+}): Promise<UsuarioResponse> {
   try {
-    // Inicializar modelos e sincronizar banco de dados
-    await initModels();
+    const response = await fetch('http://localhost:7000/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dados),
+    });
 
-    const userService = new UserService();
-    const userData = {
-      name: 'João Silva',
-      email: 'ulysses.oliveira2015@gmail.com',
-      password: 'Senha123',
-      role: 'USER' as const
-    };
+    if (!response.ok) {
+      const error = await response.json() as ApiError;
+      throw new Error(error.message || 'Erro ao criar usuário');
+    }
 
-    console.log('Enviando dados:', userData);
-    const user = await userService.createUser(userData);
-    console.log('Usuário criado:', user);
+    return await response.json() as UsuarioResponse;
   } catch (error) {
-    console.error('Erro ao criar usuário, test.ts:', error);
+    console.error('Erro ao criar usuário:', error);
     throw error;
   }
 }
 
-createUser().catch((error) => {
-  console.error('Erro:', error);
-});
-
-// Buscar usuário por ID
-const getUserById = async (userId: string): Promise<UserResponse> => {
+export async function verificarCodigo(userId: string, code: string) {
   try {
-    const response = await fetch(`http://localhost:7000/v1/users/${userId}`);
-    
+    const response = await fetch('http://localhost:7000/api/auth/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, code }),
+    });
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message);
+      const error = await response.json() as ApiError;
+      throw new Error(error.message || 'Erro ao verificar código');
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Erro ao buscar usuário:', error);
+    console.error('Erro ao verificar código:', error);
     throw error;
   }
-};
+}
 
-// getUserById('1')
+async function reenviarCodigo(userId: string) {
+  try {
+    const response = await fetch('http://localhost:7000/api/auth/resend-code', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
 
-// getUserById('1')
-//   .then(user => console.log('Usuário encontrado:', user))
-//   .catch(error => console.error('Erro:', error));
+    if (!response.ok) {
+      const error = await response.json() as ApiError;
+      throw new Error(error.message || 'Erro ao reenviar código');
+    }
 
-// // Atualizar usuário
-// const updateUser = async (userId: string, userData: UserData): Promise<UserResponse> => {
-//   try {
-//     const response = await fetch(`http://localhost:7000/api/v1/users/${userId}`, {
-//       method: 'PUT',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(userData),
-//     });
+    return await response.json();
+  } catch (error) {
+    console.error('Erro ao reenviar código:', error);
+    throw error;
+  }
+}
 
-//     if (!response.ok) {
-//       const error = await response.json();
-//       throw new Error(error.message);
-//     }
+// Exemplo de uso:
+async function main() {
+  try {
+    // Criar usuário
+    const novoUsuario = await criarUsuario({
+      name: 'João Silva',
+      email: 'ulysses.oliveira2015@gmail.com',
+      password: 'senha123',
+      role: 'USER'
+    });
 
-//     return await response.json();
-//   } catch (error) {
-//     console.error('Erro ao atualizar usuário:', error);
-//     throw error;
-//   }
-// };
+    console.log('Usuário criado com sucesso!');
+    console.log('Verifique seu email para o código de verificação.');
+    console.log('Para verificar o código, use a função verificarCodigo(novoUsuario.userId, "SEU_CODIGO")');
+    console.log('Para reenviar o código, use a função reenviarCodigo(novoUsuario.userId)');
 
-// // Deletar usuário
-// const deleteUser = async (userId: string): Promise<UserResponse> => {
-//   try {
-//       const response = await fetch(`http://localhost:7000/api/v1/users/${userId}`, {
-//       method: 'DELETE',
-//     });
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
 
-//     if (!response.ok) {
-//       const error = await response.json();
-//       throw new Error(error.message);
-//     }
+main();
 
-//     return await response.json();
-//   } catch (error) {
-//     console.error('Erro ao deletar usuário:', error);
-//     throw error;
-//   }
-// };
+export {};
 

@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { AuthenticatedRequest } from '../middlewares/auth';
 
 const catchAsync = (
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
+  fn: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<any>
 ): RequestHandler => {
   return (req, res, next) => {
-    fn(req, res, next).catch(next);
+    fn(req as AuthenticatedRequest, res, next).catch(next);
   };
 };
 
