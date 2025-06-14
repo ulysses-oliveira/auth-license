@@ -15,7 +15,7 @@ class AuthService {
 
     const user = await User.create({
       ...userData,
-      isEmailVerified: userData.isEmailVerified ?? false,
+      is_email_verified: userData.is_email_verified ?? false,
       role: userData.role ?? UserRole.USER,
     });
     return user.toJSON();
@@ -37,7 +37,7 @@ class AuthService {
 
   async generateVerificationCode(userId: string): Promise<string> {
     const code = generateVerificationCode();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+    const expires_at = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
 
     // Remove códigos antigos do usuário
     await VerificationCode.destroy({
@@ -48,7 +48,7 @@ class AuthService {
     await VerificationCode.create({
       user_id: userId,
       code,
-      expires_at: expiresAt,
+      expires_at: expires_at,
       used: false,
     });
 
@@ -76,7 +76,7 @@ class AuthService {
 
     // Marcar email como verificado
     await User.update(
-      { isEmailVerified: true },
+      { is_email_verified: true },
       { where: { id: userId } }
     );
 

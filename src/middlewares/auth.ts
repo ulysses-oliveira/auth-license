@@ -25,13 +25,21 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const requireRole = (role: UserRole) => {
+export const requireRole = (roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const authReq = req as AuthenticatedRequest;
-    if (!authReq.user || authReq.user.role !== role) {
+    const user = authReq.user;
+
+    if (!user) {
+      res.status(401).json({ error: 'Autenticação requerida' });
+      return;
+    }
+
+    if (!roles.includes(user.role)) {
       res.status(403).json({ error: 'Acesso negado' });
       return;
     }
+
     next();
   };
 };

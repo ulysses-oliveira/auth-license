@@ -2,13 +2,13 @@ export interface ILicense {
   id: string;
   userId: string;
   status: 'active' | 'inactive' | 'expired';
-  expiresAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  expires_at: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface ILicenseCreation {
   userId: string;
   status?: 'active' | 'inactive' | 'expired';
-  expiresAt: Date;
+  expires_at: Date;
 }

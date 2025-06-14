@@ -4,30 +4,30 @@ import { UserRole } from '../types';
 
 export interface UserAttributes {
   id: string;
-  google_id?: string;
+  google_id: string | null;
   email: string;
   password?: string;
-  isEmailVerified: boolean;
+  is_email_verified: boolean;
   role: UserRole;
   name: string;
   picture?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'created_at' | 'updated_at'> {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: string;
-  public google_id?: string;
+  public google_id!: string | null;
   public email!: string;
   public password?: string;
-  public isEmailVerified!: boolean;
+  public is_email_verified!: boolean;
   public role!: UserRole;
   public name!: string;
   public picture?: string;
-  public createdAt!: Date;
-  public updatedAt!: Date;
+  public created_at!: Date;
+  public updated_at!: Date;
 }
 
 User.init(
@@ -54,7 +54,7 @@ User.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    isEmailVerified: {
+    is_email_verified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
@@ -70,11 +70,11 @@ User.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    createdAt: {
+    created_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
@@ -84,6 +84,7 @@ User.init(
     modelName: 'User',
     tableName: 'users',
     timestamps: true,
+    underscored: true,
   }
 );
 

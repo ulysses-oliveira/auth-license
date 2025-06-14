@@ -4,17 +4,19 @@ export enum UserRole {
 }
 
 export interface CreateUserData {
+  id?: string;
   email: string;
   password?: string;
   name: string;
   role?: UserRole;
   google_id?: string;
   picture?: string;
-  isEmailVerified?: boolean;
+  is_email_verified?: boolean;
 }
 
 export interface AuthTokenPayload {
-  userId: string;
+  id: string;
+  googleId: string | null;
   email: string;
   role: UserRole;
 }

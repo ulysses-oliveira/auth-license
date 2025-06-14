@@ -41,7 +41,7 @@ class AuthController {
         role: UserRole.USER,
       });
 
-      if (!user || !user.id) {
+      if (!user) {
         res.status(500).json({ error: 'Erro ao criar usuário' });
         return;
       }
@@ -51,7 +51,7 @@ class AuthController {
 
       res.status(201).json({
         message: 'Usuário criado! Verifique seu email para o código de verificação.',
-        userId: user.id,
+        email: user.email,
       });
     } catch (error) {
       console.error('Erro no registro:', error);
@@ -82,17 +82,12 @@ class AuthController {
         return;
       }
 
-      if (!user.id) {
-        res.status(500).json({ error: 'Erro ao processar usuário' });
-        return;
-      }
-
       // Enviar código de verificação
       await AuthService.sendVerificationEmail(user);
 
       res.json({
         message: 'Código de verificação enviado para seu email',
-        userId: user.id,
+        email: user.email,
         requiresVerification: true,
       });
     } catch (error) {
@@ -122,12 +117,12 @@ class AuthController {
         
         if (user) {
           // Atualizar usuário existente com Google ID
-          const userInstance = await User.findByPk(user.id);
+          const userInstance = await User.findOne({ where: { email: googlePayload.email } });
           if (userInstance) {
             await userInstance.update({
               google_id: googlePayload.sub,
               picture: googlePayload.picture,
-              isEmailVerified: googlePayload.email_verified,
+              is_email_verified: googlePayload.email_verified,
             });
           }
         } else {
@@ -140,25 +135,25 @@ class AuthController {
             role: UserRole.USER,
           });
 
-          const userInstance = await User.findByPk(user.id);
+          const userInstance = await User.findOne({ where: { google_id: googlePayload.sub } });
           if (userInstance) {
-            await userInstance.update({ isEmailVerified: googlePayload.email_verified });
+            await userInstance.update({ is_email_verified: googlePayload.email_verified });
           }
         }
       }
 
-      if (!user || !user.id) {
+      if (!user) {
         res.status(500).json({ error: 'Erro ao processar usuário' });
         return;
       }
 
       // Se o email não foi verificado pelo Google, enviar código
-      if (!user.isEmailVerified) {
+      if (!user.is_email_verified) {
         await AuthService.sendVerificationEmail(user);
         
         res.json({
           message: 'Código de verificação enviado para seu email',
-          userId: user.id,
+          email: user.email,
           requiresVerification: true,
         });
         return;
@@ -166,7 +161,7 @@ class AuthController {
 
       // Gerar JWT token
       const jwtToken = AuthService.generateJWTToken({
-        userId: user.id,
+        googleId: user.google_id,
         email: user.email,
         role: user.role as UserRole,
       });
@@ -175,12 +170,12 @@ class AuthController {
         message: 'Login realizado com sucesso',
         token: jwtToken,
         user: {
-          id: user.id,
+          googleId: user.google_id,
           email: user.email,
           name: user.name,
           role: user.role,
           picture: user.picture,
-          isEmailVerified: user.isEmailVerified,
+          is_email_verified: user.is_email_verified,
         },
       });
     } catch (error) {
@@ -191,44 +186,53 @@ class AuthController {
 
   async verify(req: Request, res: Response): Promise<void> {
     try {
-      const { userId, code } = req.body;
+      const { email, code } = req.body;
 
-      if (!userId || !code) {
-        res.status(400).json({ error: 'ID do usuário e código são obrigatórios' });
+      if (!email || !code) {
+        res.status(400).json({ error: 'Email e código são obrigatórios' });
+        return;
+      }
+
+      // Buscar usuário pelo email
+      const user = await AuthService.findUserByEmail(email);
+      if (!user) {
+        res.status(404).json({ error: 'Usuário não encontrado' });
         return;
       }
 
       // Verificar código
-      const isValidCode = await AuthService.verifyCode(userId, code);
+      const isValidCode = await AuthService.verifyCode(user.id, code);
       if (!isValidCode) {
         res.status(400).json({ error: 'Código inválido ou expirado' });
         return;
       }
 
       // Buscar usuário atualizado
-      const user = await User.findByPk(userId);
-      if (!user) {
+      const updatedUser = await User.findOne({ where: { email } });
+      if (!updatedUser) {
         res.status(404).json({ error: 'Usuário não encontrado' });
         return;
       }
 
       // Gerar JWT token
       const token = AuthService.generateJWTToken({
-        userId: user.id,
-        email: user.email,
-        role: user.role as UserRole,
+        id: updatedUser.id,
+        googleId: updatedUser.google_id,
+        email: updatedUser.email,
+        role: updatedUser.role as UserRole,
       });
 
       res.json({
         message: 'Login realizado com sucesso',
         token,
         user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          picture: user.picture,
-          isEmailVerified: user.isEmailVerified,
+          id: updatedUser.id,
+          googleId: updatedUser.google_id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          role: updatedUser.role,
+          picture: updatedUser.picture,
+          is_email_verified: updatedUser.is_email_verified,
         },
       });
     } catch (error) {
@@ -239,14 +243,14 @@ class AuthController {
 
   async resendCode(req: Request, res: Response): Promise<void> {
     try {
-      const { userId } = req.body;
+      const { email } = req.body;
 
-      if (!userId) {
-        res.status(400).json({ error: 'ID do usuário é obrigatório' });
+      if (!email) {
+        res.status(400).json({ error: 'Email é obrigatório' });
         return;
       }
 
-      const user = await User.findByPk(userId);
+      const user = await AuthService.findUserByEmail(email);
       if (!user) {
         res.status(404).json({ error: 'Usuário não encontrado' });
         return;

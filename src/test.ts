@@ -41,7 +41,7 @@ export async function verificarCodigo(userId: string, code: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId, code }),
+      body: JSON.stringify({ email: 'ulysses.oliveira2015@gmail.com', code }),
     });
 
     if (!response.ok) {

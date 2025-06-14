@@ -4,16 +4,16 @@ export interface IUser {
   email: string;
   password: string;
   role: 'USER' | 'ADMIN';
-  isEmailVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  is_email_verified: boolean;
+  created_at: Date;
+  updated_at: Date;
   licenses?: Array<{
     id: string;
     userId: string;
     status: string;
-    expiresAt: Date;
-    createdAt: Date;
-    updatedAt: Date;
+    expires_at: Date;
+    created_at: Date;
+    updated_at: Date;
   }>;
 }
 

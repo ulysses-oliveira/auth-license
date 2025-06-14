@@ -7,7 +7,7 @@ class UserController {
     const authReq = req as AuthenticatedRequest;
     try {
       const user = await User.findByPk(authReq.user!.userId, {
-        attributes: ['id', 'email', 'name', 'role', 'picture', 'isEmailVerified', 'created_at'],
+        attributes: ['id', 'email', 'name', 'role', 'picture', 'is_email_verified', 'created_at'],
       });
 
       if (!user) {
@@ -41,7 +41,7 @@ class UserController {
       }
 
       const updatedUser = await User.findByPk(authReq.user!.userId, {
-        attributes: ['id', 'email', 'name', 'role', 'picture', 'isEmailVerified'],
+        attributes: ['id', 'email', 'name', 'role', 'picture', 'is_email_verified'],
       });
 
       res.json(updatedUser);
@@ -55,7 +55,7 @@ class UserController {
     const authReq = req as AuthenticatedRequest;
     try {
       const users = await User.findAll({
-        attributes: ['id', 'email', 'name', 'role', 'isEmailVerified', 'created_at'],
+        attributes: ['id', 'email', 'name', 'role', 'is_email_verified', 'created_at'],
       });
 
       res.json(users);

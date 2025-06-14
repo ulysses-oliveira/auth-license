@@ -27,7 +27,7 @@ export class UserService {
     const user = await User.create({
       ...userData,
       role: userData.role || 'USER',
-      isEmailVerified: true
+      is_email_verified: true
     });
 
     if (!user) {
@@ -45,8 +45,8 @@ export class UserService {
     const userData = user.toJSON();
     return {
       ...userData,
-      createdAt: userData.createdAt || new Date(),
-      updatedAt: userData.updatedAt || new Date()
+      created_at: userData.created_at || new Date(),
+      updated_at: userData.updated_at || new Date()
     };
   }
 

@@ -1,33 +1,31 @@
 import { DataTypes, Model, Optional, Sequelize } from 'sequelize';
-import { User } from './User';
+import User from './User';
 
 // Atributos do modelo
 interface LicenseAttributes {
   id: string;
-  userId: string;
+  user_id: string;
   status: 'ACTIVE' | 'INACTIVE' | 'EXPIRED';
-  expiresAt: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
+  expires_at: Date;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-interface LicenseCreationAttributes extends Optional<LicenseAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
+interface LicenseCreationAttributes extends Optional<LicenseAttributes, 'created_at' | 'updated_at'> {}
 
 export class License extends Model<LicenseAttributes, LicenseCreationAttributes> implements LicenseAttributes {
   public id!: string;
-  public userId!: string;
+  public user_id!: string;
   public status!: 'ACTIVE' | 'INACTIVE' | 'EXPIRED';
-  public expiresAt!: Date;
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  public expires_at!: Date;
+  public created_at!: Date;
+  public updated_at!: Date;
 
   // Associações
   declare user?: typeof User;
 }
 
 export default (sequelize: Sequelize) => {
-  
   License.init(
     {
       id: {
@@ -35,7 +33,7 @@ export default (sequelize: Sequelize) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      userId: {
+      user_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
@@ -48,15 +46,24 @@ export default (sequelize: Sequelize) => {
         allowNull: false,
         defaultValue: 'ACTIVE'
       },
-      expiresAt: {
+      expires_at: {
         type: DataTypes.DATE,
         allowNull: false,
+      },
+      created_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
       }
     },
     {
       sequelize,
       tableName: 'licenses',
-      timestamps: true
+      timestamps: true,
+      underscored: true,
     }
   );
 

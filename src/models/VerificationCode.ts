@@ -60,6 +60,7 @@ VerificationCode.init(
     modelName: 'VerificationCode',
     tableName: 'verification_codes',
     timestamps: false,
+    underscored: true,
   }
 );
 
