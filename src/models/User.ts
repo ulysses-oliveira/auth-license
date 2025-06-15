@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import { UserRole } from '../types';
+import bcrypt from 'bcryptjs';
 
 export interface UserAttributes {
   id: string;
@@ -28,6 +29,11 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public picture?: string;
   public created_at!: Date;
   public updated_at!: Date;
+
+  public async verifyPassword(plainPassword: string): Promise<boolean> {
+    if (!this.password) return false;
+    return await bcrypt.compare(plainPassword, this.password);
+  }
 }
 
 User.init(
@@ -85,6 +91,18 @@ User.init(
     tableName: 'users',
     timestamps: true,
     underscored: true,
+    hooks: {
+      beforeCreate: async (user: User) => {
+        if (user.password) {
+          user.password = await bcrypt.hash(user.password, 12);
+        }
+      },
+      beforeUpdate: async (user: User) => {
+        if (user.changed('password')) {
+          user.password = await bcrypt.hash(user.password!, 12);
+        }
+      }
+    }
   }
 );
 

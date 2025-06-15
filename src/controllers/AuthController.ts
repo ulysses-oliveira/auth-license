@@ -69,18 +69,20 @@ class AuthController {
       }
 
       // Buscar usuário
-      const user = await AuthService.findUserByEmail(email);
-      if (!user || !user.password) {
+      const userInstance = await User.findOne({ where: { email } });
+      if (!userInstance || !userInstance.password) {
         res.status(401).json({ error: 'Credenciais inválidas' });
         return;
       }
 
       // Verificar senha
-      const validPassword = await AuthService.verifyPassword(password, user.password);
+      const validPassword = await userInstance.verifyPassword(password);
       if (!validPassword) {
         res.status(401).json({ error: 'Credenciais inválidas' });
         return;
       }
+
+      const user = userInstance.toJSON();
 
       // Enviar código de verificação
       await AuthService.sendVerificationEmail(user);
@@ -161,6 +163,7 @@ class AuthController {
 
       // Gerar JWT token
       const jwtToken = AuthService.generateJWTToken({
+        id: user.id,
         googleId: user.google_id,
         email: user.email,
         role: user.role as UserRole,

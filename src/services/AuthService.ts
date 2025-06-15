@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import { User, VerificationCode } from '../models';
@@ -9,10 +8,6 @@ import type { UserAttributes } from '../models/User';
 
 class AuthService {
   async createUser(userData: CreateUserData): Promise<UserAttributes> {
-    if (userData.password) {
-      userData.password = await bcrypt.hash(userData.password, 12);
-    }
-
     const user = await User.create({
       ...userData,
       is_email_verified: userData.is_email_verified ?? false,
@@ -29,10 +24,6 @@ class AuthService {
   async findUserByGoogleId(googleId: string): Promise<UserAttributes | null> {
     const user = await User.findOne({ where: { google_id: googleId } });
     return user ? user.toJSON() : null;
-  }
-
-  async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
-    return await bcrypt.compare(plainPassword, hashedPassword);
   }
 
   async generateVerificationCode(userId: string): Promise<string> {
